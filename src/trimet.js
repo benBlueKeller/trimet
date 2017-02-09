@@ -72,10 +72,11 @@ export default class Trimet extends Component {
 	render() {
 		var matchesList = (<ul></ul>);
 		if(typeof this.state.locations[1] === 'object') {
+			console.log(this.state.locations[1].desc);
 			const matches = this.state.matches;
-			const loc1 = this.state.locations[0];
-			const loc2 = this.state.loctions[1];
-			matchesList = mapMatchesToUl(matches, loc1, loc2);
+			const locA = this.state.locations[0];
+			const locB = this.state.locations[1];
+			matchesList = mapMatchesToUl(matches, locA, locB);
 		}
 
 		function mapMatchesToUl(matches, loc1, loc2) {
@@ -89,19 +90,19 @@ export default class Trimet extends Component {
 							departure.time = new Date(match.a1.estimated);
 						} else {
 							departure.time = new Date(match.a1.scheduled);
-						}
+						} 
 						if(match.a2.estimated) {
-							departure.time = new Date(match.a2.estimated);
+							arrival.time = new Date(match.a2.estimated);
 						} else {
-							departure.time = new Date(match.a2.scheduled);
+							arrival.time = new Date(match.a2.scheduled);
 						}
 						return (
 							<li>
 								<h2>{bus.fullSign}</h2>
 								<h3>{departure.desc}</h3>
-								<p>{departure.time.toDateString()}</p>
+								<p>{departure.time.toISOString()}</p>
 								<h3>{arrival.desc}</h3>
-								<p>{arrival.time.toDateString()}</p>
+								<p>{arrival.time.toISOString()}</p>
 							</li>
 						)
 					})}
