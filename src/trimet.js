@@ -43,6 +43,22 @@ export default class Trimet extends Component {
 			return matches
 		}
 
+		function findArrivalDelta(matches) {
+			return matches.map((match, index) => {
+				console.log("match" + index + "\n  ", match);
+				var delta = Math.abs(match.a1.scheduled - match.a2.scheduled);
+				var deltaObj = {
+					deltaMin: Math.floor(delta / 1000 / 60),
+					secRemain: delta / 1000 % 60
+				}
+				return {
+					...match,
+					deltaObj
+				}
+
+			});
+		}
+
 		function findLocationsAndArrivals(startID = "7984", endID = "7957", callback) {
 			function getUrl(locIDs = "7984", arrivals = "4", appID = api.trimet) { return "http://developer.trimet.org/ws/V2/arrivals?json=true&locIDs="+locIDs+"&appID="+appID+"&arrivals="+arrivals;}
 			let url = getUrl(startID + "," + endID);
@@ -64,7 +80,7 @@ export default class Trimet extends Component {
 		findLocationsAndArrivals("7984", "7957", (locations, arrivals) => {
 			this.setState({
 				locations,
-				matches: findMatches(locations[0], locations[1], arrivals)
+				matches: findArrivalDelta(findMatches(locations[0], locations[1], arrivals))
 			});
 		});
 	}
@@ -85,7 +101,8 @@ export default class Trimet extends Component {
 					{matches.map((match, index) => {
 						var bus = { fullSign: match.a1.fullSign, vehicleID: match.a1.vehicleID},
 							departure = { desc: loc1.desc },
-							arrival = { desc: loc2.desc };
+							arrival = { desc: loc2.desc },
+							deltaString = match.deltaObj.deltaMin + "m " + match.deltaObj.secRemain +"s difference";
 						if(match.a1.estimated) {
 							departure.time = new Date(match.a1.estimated);
 						} else {
@@ -103,6 +120,7 @@ export default class Trimet extends Component {
 								<p>{departure.time.toISOString()}</p>
 								<h3>{arrival.desc}</h3>
 								<p>{arrival.time.toISOString()}</p>
+								<p>{deltaString}</p>
 							</li>
 						)
 					})}
